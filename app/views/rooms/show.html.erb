@@ -5,7 +5,7 @@
   <%= @room.name %>
 </p>
 
-<textarea name="name" rows="8" cols="80"></textarea>
+<textarea id="white-bord" name="name" rows="8" cols="80"></textarea>
 
 <hr>
 
@@ -34,7 +34,7 @@ $(function() {
   let room;
 
   peer.on('open',function(){
-    // alert(peer.id);
+
     navigator.mediaDevices.getUserMedia({video:true, audio:true }).then(stream => {
       $('#my-video').get(0).srcObject = stream;
       localStream = stream;
@@ -42,11 +42,18 @@ $(function() {
       room=peer.joinRoom("test",{mode:"sfu",stream:localStream});
       debugger;
       room.on('open',function(){
-        // alert("ひらいた");
+
         room.on("stream",function(stream){
-          // alert("きた");
-          // debugger;
           stream_to_tag(stream);
+        })
+
+        room.on("data",function(data){
+          $("#white-bord").val(data.data.data);
+        })
+
+        $("#white-bord").keyup(function(){
+          var data=$("#white-bord").val();
+          room.send({label:"white-bord",data:data});
         })
       })
     })
