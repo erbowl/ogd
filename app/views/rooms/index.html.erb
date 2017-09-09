@@ -4,12 +4,13 @@
 
 <div id="top"class="container">
     <div class="row">
-       <div class="col-md-10 col-md-offset-1">
-         <h1>OGD(オンライングループディスカッション)</h1>
-         <table>
+       <div class="col-md-8 col-md-offset-2">
+         <h1>OGD</h1>
+         <h2>オンライングループディスカッション</h2>
+         <table class="table">
            <thead>
              <tr>
-               <th>Name</th>
+               <th>ルーム一覧</th>
                <th colspan="3"></th>
              </tr>
            </thead>
@@ -17,14 +18,14 @@
            <tbody>
              <% @rooms.each do |room| %>
                <tr>
-                 <td><%= room.name %></td>
-                 <td><%= link_to 'Show', room %></td>
+                 <td><%= link_to room.name, room %></td>
                  <td><%= link_to 'Edit', edit_room_path(room) %></td>
                  <td><%= link_to 'Destroy', room, method: :delete, data: { confirm: 'Are you sure?' } %></td>
                </tr>
              <% end %>
            </tbody>
          </table>
+         <%= link_to 'New Room', new_room_path %>
 
        </div>
     </div>
@@ -33,4 +34,6 @@
 
 <br>
 
-<%= link_to 'New Room', new_room_path %>
+<script type="text/javascript">
+
+</script>
