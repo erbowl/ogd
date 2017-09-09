@@ -1,20 +1,18 @@
-<p id="notice"><%= notice %></p>
-
 <p>
-  <strong>Name:</strong>
+  <strong>お題:</strong>
   <%= @room.name %>
+  <strong>
+  制限時間
+  </strong>
+  <span id="timer_m">02</span>:<span id="timer_s">00</span>
 </p>
+<p><strong>条件:</strong>ダミーテキストです</p>
 
-<textarea id="white-bord" name="name" rows="8" cols="80"></textarea>
 
-<hr>
+<p>ホワイトボード（最新の情報に更新されます）</p>
+<textarea id="white-bord" name="name" rows="20" cols="100"></textarea>
 
 <video id="my-video" autoplay poster="posterimage.jpg"></video>
-
-
-<%= link_to 'Edit', edit_room_path(@room) %> |
-<%= link_to 'Back', rooms_path %>
-
 
 <!-- あとでファイル分ける -->
 
@@ -38,9 +36,8 @@ $(function() {
     navigator.mediaDevices.getUserMedia({video:true, audio:true }).then(stream => {
       $('#my-video').get(0).srcObject = stream;
       localStream = stream;
-
-      room=peer.joinRoom("test",{mode:"sfu",stream:localStream});
-      debugger;
+      var roomName='<%= @room.id %>';
+      room=peer.joinRoom(roomName,{mode:"sfu",stream:localStream});
       room.on('open',function(){
 
         room.on("stream",function(stream){
@@ -55,6 +52,15 @@ $(function() {
           var data=$("#white-bord").val();
           room.send({label:"white-bord",data:data});
         })
+
+        room.on("peerLeave",function(peerId){
+          $("video#"+peerId).hide();
+        })
+
+        // room.on("data",function(data){
+        //   $("#white-bord").val(data.data.data);
+        // })
+
       })
     })
   })
@@ -66,12 +72,41 @@ function stream_to_tag(stream) {
     $("body").append($video);
     $video.attr("src",window.URL.createObjectURL(stream));
     $video.attr("id",stream.peerId);
+    $video.attr("class","other-peer");
     $video.show();
     var rgbColor = 'rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')';
     $video.css('border-color', rgbColor);
     $video.draggable();
   }
 }
+
+
+var m;
+var s;
+var remaining;
+
+
+
+function countDown(){
+  m=parseInt($("#timer_m").text());
+  s=parseInt($("#timer_s").text());
+  remaining=m*60+s;
+  if(remaining>0){
+     if (s>0) {
+       s--;
+     }else{
+       s=59;
+       m--;
+     }
+
+     $("#timer_m").text(('00' + m).slice(-2));
+     $("#timer_s").text(('00' + s).slice(-2));
+  }else{
+    alert("時間切れです");
+  }
+}
+
+setInterval(countDown,1000);
 
 });
 </script>
