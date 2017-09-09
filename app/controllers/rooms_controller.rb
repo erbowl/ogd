@@ -10,6 +10,13 @@ class RoomsController < ApplicationController
   # GET /rooms/1
   # GET /rooms/1.json
   def show
+    if params["end"]==true
+      redirect_to :action => 'result'
+    end
+  end
+
+  def result
+    
   end
 
   # GET /rooms/new

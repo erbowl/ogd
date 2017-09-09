@@ -1,16 +1,25 @@
-<p>
-  <strong>お題:</strong>
-  <%= @room.name %>
-  <strong>
-  制限時間
-  </strong>
-  <span id="timer_m">02</span>:<span id="timer_s">00</span>
-</p>
-<p><strong>条件:</strong>ダミーテキストです</p>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.11.0/umd/popper.min.js" integrity="sha384-b/U6ypiBEHpOf/4+1nzFpr53nxSS+GLCkfwBdFNTxtclqqenISfwAzpKaMNFNmj4" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/js/bootstrap.min.js" integrity="sha384-h0AbiXch4ZDo7tp9hKZ4TsHbi047NrKGLO3SEJAg45jXxnGIfYzk4Si90RDIqNm1" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous">
 
 
-<p>ホワイトボード（最新の情報に更新されます）</p>
-<textarea id="white-bord" name="name" rows="20" cols="100"></textarea>
+<div class="container">
+  <p></p>
+  <p>
+    <strong>お題:</strong>
+    <%= @room.name %>
+    <strong>
+    制限時間
+    </strong>
+    <span id="timer_m">01</span>:<span id="timer_s">20</span>
+  </p>
+  <p><strong>条件:</strong>面白いこと</p>
+  <p><strong>※ホワイトボードが結論として最終的に保存されます</strong></p>
+
+  <textarea id="white-bord" name="name" rows="15" cols="100"></textarea>
+</div>
+
+
 
 <video id="my-video" autoplay poster="posterimage.jpg"></video>
 
@@ -22,8 +31,13 @@
 
 /* eslint-disable require-jsdoc */
 $(function() {
+  var roomName='<%= @room.id %>';
   // Peer object
-  const peer = new Peer({
+  // Dateオブジェクトを作成
+  var date = new Date() ;
+  // UNIXタイムスタンプを取得する (ミリ秒単位)
+  var a = date.getTime() ;
+  const peer = new Peer(roomName+a,{
     key:   "ca56abf9-c509-4d78-b2cc-88a51817fd99",
     debug: 3
   });
@@ -36,7 +50,6 @@ $(function() {
     navigator.mediaDevices.getUserMedia({video:true, audio:true }).then(stream => {
       $('#my-video').get(0).srcObject = stream;
       localStream = stream;
-      var roomName='<%= @room.id %>';
       room=peer.joinRoom(roomName,{mode:"sfu",stream:localStream});
       room.on('open',function(){
 
@@ -102,11 +115,12 @@ function countDown(){
      $("#timer_m").text(('00' + m).slice(-2));
      $("#timer_s").text(('00' + s).slice(-2));
   }else{
-    alert("時間切れです");
+    // location.href=location.href+"?end=true";
   }
 }
 
 setInterval(countDown,1000);
+
 
 });
 </script>
