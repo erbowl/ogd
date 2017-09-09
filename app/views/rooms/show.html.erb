@@ -9,6 +9,7 @@
 
 <hr>
 
+<video id="my-video" autoplay poster="posterimage.jpg"></video>
 
 
 <%= link_to 'Edit', edit_room_path(@room) %> |
@@ -17,7 +18,8 @@
 
 <!-- あとでファイル分ける -->
 
-<script src="https://skyway.io/dist/0.3/peer.js"></script>
+<script type="text/javascript" src="https://cdn.webrtc.ecl.ntt.com/skyway-latest.js"></script>
+<script src="https://code.jquery.com/ui/1.11.4/jquery-ui.js" integrity="sha256-DI6NdAhhFRnO2k51mumYeDShet3I8AKCQf/tf7ARNhI=" crossorigin="anonymous"></script>
 <script type="text/javascript">
 
 /* eslint-disable require-jsdoc */
@@ -31,146 +33,38 @@ $(function() {
   let localStream;
   let room;
 
-  peer.on('open', () => {
-    debugger;
-    // $('#my-id').text(peer.id);
-    // Get things started
-    step1();
-  });
-
-  peer.on('error', err => {
-    alert(err.message);
-    // Return to step 2 if error occurs
-    step2();
-  });
-
-  $('#make-call').on('submit', e => {
-    e.preventDefault();
-    // Initiate a call!
-    const roomName = $('#join-room').val();
-    if (!roomName) {
-      return;
-    }
-    room = peer.joinRoom('sfu_video_' + roomName, {mode: 'sfu', stream: localStream});
-
-    $('#room-id').text(roomName);
-    step3(room);
-  });
-
-  $('#end-call').on('click', () => {
-    room.close();
-    step2();
-  });
-
-  // Retry if getUserMedia fails
-  $('#step1-retry').on('click', () => {
-    $('#step1-error').hide();
-    step1();
-  });
-
-  // set up audio and video input selectors
-  const audioSelect = $('#audioSource');
-  const videoSelect = $('#videoSource');
-  const selectors = [audioSelect, videoSelect];
-
-  navigator.mediaDevices.enumerateDevices()
-    .then(deviceInfos => {
-      const values = selectors.map(select => select.val() || '');
-      selectors.forEach(select => {
-        const children = select.children(':first');
-        while (children.length) {
-          select.remove(children);
-        }
-      });
-
-      for (let i = 0; i !== deviceInfos.length; ++i) {
-        const deviceInfo = deviceInfos[i];
-        const option = $('<option>').val(deviceInfo.deviceId);
-
-        if (deviceInfo.kind === 'audioinput') {
-          option.text(deviceInfo.label ||
-            'Microphone ' + (audioSelect.children().length + 1));
-          audioSelect.append(option);
-        } else if (deviceInfo.kind === 'videoinput') {
-          option.text(deviceInfo.label ||
-            'Camera ' + (videoSelect.children().length + 1));
-          videoSelect.append(option);
-        }
-      }
-
-      selectors.forEach((select, selectorIndex) => {
-        if (Array.prototype.slice.call(select.children()).some(n => {
-          return n.value === values[selectorIndex];
-        })) {
-          select.val(values[selectorIndex]);
-        }
-      });
-
-      videoSelect.on('change', step1);
-      audioSelect.on('change', step1);
-    });
-
-  function step1() {
-    // Get audio/video stream
-    const audioSource = $('#audioSource').val();
-    const videoSource = $('#videoSource').val();
-    const constraints = {
-      audio: {deviceId: audioSource ? {exact: audioSource} : undefined},
-      video: {deviceId: videoSource ? {exact: videoSource} : undefined},
-    };
-
-    navigator.mediaDevices.getUserMedia(constraints).then(stream => {
+  peer.on('open',function(){
+    // alert(peer.id);
+    navigator.mediaDevices.getUserMedia({video:true, audio:true }).then(stream => {
       $('#my-video').get(0).srcObject = stream;
       localStream = stream;
 
-      if (room) {
-        room.replaceStream(stream);
-        return;
-      }
+      room=peer.joinRoom("test",{mode:"sfu",stream:localStream});
+      debugger;
+      room.on('open',function(){
+        // alert("ひらいた");
+        room.on("stream",function(stream){
+          // alert("きた");
+          // debugger;
+          stream_to_tag(stream);
+        })
+      })
+    })
+  })
 
-      step2();
-    }).catch(err => {
-      $('#step1-error').show();
-      console.error(err);
-    });
+
+function stream_to_tag(stream) {
+  if($("video#"+stream.peerId).length==0){
+    $video=$("<video>");
+    $("body").append($video);
+    $video.attr("src",window.URL.createObjectURL(stream));
+    $video.attr("id",stream.peerId);
+    $video.show();
+    var rgbColor = 'rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')';
+    $video.css('border-color', rgbColor);
+    $video.draggable();
   }
+}
 
-  function step2() {
-    $('#step1, #step3').hide();
-    $('#step2').show();
-    $('#join-room').focus();
-  }
-
-  function step3(room) {
-    // Wait for stream on the call, then set peer video display
-    room.on('stream', stream => {
-      const peerId = stream.peerId;
-      const id = 'video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '');
-
-      $('#their-videos').append($(
-        '<div class="video_' + peerId +'" id="' + id + '">' +
-          '<label>' + stream.peerId + ':' + stream.id + '</label>' +
-          '<video class="remoteVideos">' +
-        '</div>'));
-      const el = $('#' + id).find('video').get(0);
-      el.srcObject = stream;
-      el.play();
-    });
-
-    room.on('removeStream', stream => {
-      const peerId = stream.peerId;
-      $('#video_' + peerId + '_' + stream.id.replace('{', '').replace('}', '')).remove();
-    });
-
-    // UI stuff
-    room.on('close', step2);
-    room.on('peerLeave', peerId => {
-      $('.video_' + peerId).remove();
-    });
-    $('#step1, #step2').hide();
-    $('#step3').show();
-  }
 });
-
-
 </script>
