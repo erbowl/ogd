@@ -13,7 +13,7 @@
   <p>
     制限時間
     </strong>
-    <span id="timer_m">03</span>:<span id="timer_s">00</span>
+    <span id="timer_m">02</span>:<span id="timer_s">0</span>
   </p>
   <p><strong>条件:</strong>面白いこと</p>
   <p><strong>※ホワイトボードが結論として最終的に保存されます</strong></p>
@@ -24,6 +24,10 @@
 
 
 <video id="my-video" autoplay poster="posterimage.jpg"></video>
+<div id="peers">
+  <p>参加者</p>
+
+</div>
 
 <!-- あとでファイル分ける -->
 
@@ -39,6 +43,7 @@ $(function() {
   var date = new Date() ;
   // UNIXタイムスタンプを取得する (ミリ秒単位)
   var a = date.getTime() ;
+  var peer_count=0;
   const peer = new Peer(roomName+"_"+a,{
     key:   "ca56abf9-c509-4d78-b2cc-88a51817fd99",
     debug: 3
@@ -92,6 +97,9 @@ function stream_to_tag(stream) {
     var rgbColor = 'rgb(' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ',' + Math.floor(Math.random() * 256) + ')';
     $video.css('border-color', rgbColor);
     $video.draggable();
+    $pe=$("<p>"+stream.peerId+"</p>");
+    $("#peers").append($pe);
+    $pe.css('color', rgbColor);;
   }
 }
 
@@ -153,7 +161,7 @@ var set=setInterval(countDown,1000);
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary">送信する</button>
+        <a href="/"><button type="button" class="btn btn-primary">送信する</button></a>
       </div>
     </div>
   </div>

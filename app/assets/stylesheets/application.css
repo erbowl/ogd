@@ -46,3 +46,10 @@ textarea{
 #top{
   margin-top: 20px;
 }
+#peers{
+  position: absolute;
+  right:0px;
+  bottom:0px;
+  height: 200px;
+  width: 300px;
+}
