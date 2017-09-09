@@ -37,7 +37,7 @@ $(function() {
   var date = new Date() ;
   // UNIXタイムスタンプを取得する (ミリ秒単位)
   var a = date.getTime() ;
-  const peer = new Peer(roomName+a,{
+  const peer = new Peer(roomName+"_"+a,{
     key:   "ca56abf9-c509-4d78-b2cc-88a51817fd99",
     debug: 3
   });
